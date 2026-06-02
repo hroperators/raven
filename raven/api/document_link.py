@@ -58,6 +58,11 @@ def get_preview_data(doctype: str, docname: str | int):
 	title_field = meta.get_title_field()
 	image_field = meta.image_field
 
+	if doctype == "Customer":
+		for fieldname in ("customer_primary_address", "customer_primary_contact", "customer_custom_drive"):
+			if meta.has_field(fieldname):
+				preview_fields.append(fieldname)
+
 	preview_fields.append(title_field)
 	preview_fields.append(image_field)
 	preview_fields.append("name")
@@ -76,8 +81,26 @@ def get_preview_data(doctype: str, docname: str | int):
 		"raven_document_link": get(doctype, docname),
 	}
 
+	customer_custom_labels = {
+		"customer_primary_address": "Primary Address",
+		"customer_primary_contact": "Primary Contact",
+		"customer_custom_drive": "Customer Drive Link",
+	}
+
 	for key, val in preview_data.items():
 		if val and meta.has_field(key) and key not in [image_field, title_field, "name"]:
+			if doctype == "Customer" and key == "customer_primary_address":
+				formatted_preview_data[customer_custom_labels[key]] = _format_customer_primary_address(val)
+				continue
+
+			if doctype == "Customer" and key == "customer_primary_contact":
+				formatted_preview_data[customer_custom_labels[key]] = _format_customer_primary_contact(val)
+				continue
+
+			if doctype == "Customer" and key == "customer_custom_drive":
+				formatted_preview_data[customer_custom_labels[key]] = _format_customer_drive_link(val)
+				continue
+
 			formatted_preview_data[meta.get_field(key).label] = frappe.format(
 				val,
 				meta.get_field(key).fieldtype,
@@ -148,3 +171,57 @@ def delete_property_setter(doc_type, property=None, field_name=None, row_name=No
 	property_setters = frappe.db.get_values("Property Setter", filters)
 	for ps in property_setters:
 		frappe.get_doc("Property Setter", ps).delete(force=True)
+
+
+def _format_customer_primary_address(address_name):
+	address_name = str(address_name).strip()
+	if not address_name:
+		return ""
+
+	addr = frappe.db.get_value(
+		"Address",
+		address_name,
+		["address_title", "address_line1", "address_line2", "city", "state", "pincode"],
+		as_dict=True,
+	)
+	if not addr:
+		return address_name
+
+	line1 = (addr.get("address_line1") or "").strip()
+	line2 = (addr.get("address_line2") or "").strip()
+	city = (addr.get("city") or "").strip()
+	state = (addr.get("state") or "").strip()
+	pincode = (addr.get("pincode") or "").strip()
+	city_state_zip = " ".join([part for part in [city, state, pincode] if part]).strip()
+
+	parts = [part for part in [line1, line2, city_state_zip] if part]
+	return "<br>".join(parts) if parts else address_name
+
+
+def _format_customer_primary_contact(contact_name):
+	contact_name = str(contact_name).strip()
+	if not contact_name:
+		return ""
+
+	first_name, last_name = frappe.db.get_value("Contact", contact_name, ["first_name", "last_name"]) or (
+		None,
+		None,
+	)
+	full_name = " ".join([part for part in [first_name, last_name] if part]).strip()
+	return full_name or contact_name
+
+
+def _format_customer_drive_link(raw_value):
+	url = str(raw_value).strip()
+	if not url:
+		return ""
+
+	if not (url.startswith("http://") or url.startswith("https://")):
+		url = f"https://{url}"
+
+	safe_url = frappe.utils.escape_html(url)
+	return (
+		f'<a href="{safe_url}" target="_blank" rel="noopener noreferrer">'
+		"Customer Drive Link"
+		"</a>"
+	)
