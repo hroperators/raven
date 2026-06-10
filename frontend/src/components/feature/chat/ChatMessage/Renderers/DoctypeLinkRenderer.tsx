@@ -4,7 +4,8 @@ import { FrappeConfig, FrappeContext, useFrappeGetCall } from "frappe-react-sdk"
 import { useContext, useMemo, useState } from "react"
 import { Grid, Text, Box, Card } from "@radix-ui/themes"
 import { toast } from "sonner"
-import { BiCopy, BiDotsHorizontalRounded, BiGitPullRequest, BiLinkExternal, BiPrinter, BiRightArrowAlt } from "react-icons/bi"
+import { BiCopy, BiDotsHorizontalRounded, BiGitPullRequest, BiLinkExternal, BiPhone, BiPrinter, BiRightArrowAlt } from "react-icons/bi"
+import { ManualSyncDialog } from "./ManualSyncDialog"
 import useDoctypeMeta from "@/hooks/useDoctypeMeta"
 import { HStack } from "@/components/layout/Stack"
 import { ErrorBanner, getErrorMessage } from "@/components/layout/AlertBanner/ErrorBanner"
@@ -208,10 +209,26 @@ const DoctypeCard = ({ data, doctype, route, docname, mutate }: {
     )
 }
 
+type CardMenuAction = {
+    label: string
+    action: string
+}
+
 const DoctypeActionMenu = ({ doctype, docname, onCopyLinkClick, mutate }: { doctype: string, docname: string, onCopyLinkClick: VoidFunction, mutate: VoidFunction }) => {
 
+    const [manualSyncOpen, setManualSyncOpen] = useState(false)
 
-    return <DropdownMenu.Root>
+    const { data: cardActions } = useFrappeGetCall<{ message: CardMenuAction[] }>(
+        'raven.api.document_link.get_card_menu_actions',
+        { doctype, docname },
+        `card-menu-actions-${doctype}-${docname}`,
+        { revalidateOnFocus: false, shouldRetryOnError: false }
+    )
+
+    const extraActions = cardActions?.message || []
+
+    return <>
+    <DropdownMenu.Root>
         <DropdownMenu.Trigger>
             <IconButton
                 size='1'
@@ -234,8 +251,32 @@ const DoctypeActionMenu = ({ doctype, docname, onCopyLinkClick, mutate }: { doct
 
             <WorkflowSubMenu doctype={doctype} docname={docname} mutate={mutate} />
 
+            {extraActions.map((item) => (
+                <DropdownMenu.Item
+                    key={item.action}
+                    onSelect={() => {
+                        if (item.action === 'manual_oah_sync') {
+                            setManualSyncOpen(true)
+                        }
+                    }}
+                >
+                    <Flex gap='2' align='center' pr={'4'}>
+                        <BiPhone size={'16'} />
+                        {item.label}
+                    </Flex>
+                </DropdownMenu.Item>
+            ))}
+
         </DropdownMenu.Content>
     </DropdownMenu.Root>
+    <ManualSyncDialog
+        doctype={doctype}
+        docname={docname}
+        open={manualSyncOpen}
+        onOpenChange={setManualSyncOpen}
+        onSynced={mutate}
+    />
+    </>
 }
 
 const WorkflowSubMenu = ({ doctype, docname, mutate }: { doctype: string, docname: string, mutate: VoidFunction }) => {

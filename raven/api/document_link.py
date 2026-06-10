@@ -110,6 +110,18 @@ def get_preview_data(doctype: str, docname: str | int):
 	return formatted_preview_data
 
 
+@frappe.whitelist(methods=["GET"])
+def get_card_menu_actions(doctype: str, docname: str | int):
+	"""Return extra actions for Raven linked-document cards (via app hooks)."""
+	actions = []
+	for hook in frappe.get_hooks("raven_document_card_menu_actions") or []:
+		items = frappe.get_attr(hook)(doctype, docname) or []
+		if isinstance(items, dict):
+			items = [items]
+		actions.extend(items)
+	return actions
+
+
 @frappe.whitelist(methods=["POST"])
 def update_preview_fields(doctype: str, fields: list[str]):
 
