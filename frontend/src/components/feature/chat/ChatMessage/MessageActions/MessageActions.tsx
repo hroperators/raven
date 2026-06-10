@@ -2,7 +2,7 @@ import { ContextMenu, Flex } from '@radix-ui/themes'
 import { FileMessage, Message } from '../../../../../../../types/Messaging/Message'
 import { useContext } from 'react'
 import { UserContext } from '@/utils/auth/UserProvider'
-import { BiBookmarkMinus, BiBookmarkPlus, BiCopy, BiDownload, BiLink, BiPaperclip, BiTrash } from 'react-icons/bi'
+import { BiBookmarkMinus, BiBookmarkPlus, BiCopy, BiDownload, BiHardDrive, BiLink, BiPaperclip, BiTrash } from 'react-icons/bi'
 import { FrappeConfig, FrappeContext } from 'frappe-react-sdk'
 import { useMessageCopy } from './useMessageCopy'
 import { RetractVote } from './RetractVote'
@@ -25,10 +25,11 @@ export interface MessageContextMenuProps {
     onForward: VoidFunction,
     onViewReaction?: VoidFunction,
     onAttachDocument: VoidFunction,
+    onSaveToDrive?: VoidFunction,
     showThreadButton?: boolean,
     selectedText?: string
 }
-export const MessageContextMenu = ({ message, onDelete, onEdit, onReply, onForward, showThreadButton, onAttachDocument, onViewReaction, selectedText }: MessageContextMenuProps) => {
+export const MessageContextMenu = ({ message, onDelete, onEdit, onReply, onForward, showThreadButton, onAttachDocument, onSaveToDrive, onViewReaction, selectedText }: MessageContextMenuProps) => {
 
     const copy = useMessageCopy(message, selectedText)
     const { currentUser } = useContext(UserContext)
@@ -94,6 +95,15 @@ export const MessageContextMenu = ({ message, onDelete, onEdit, onReply, onForwa
                                     Attach File to Document
                                 </Flex>
                             </ContextMenu.Item>
+
+                            {onSaveToDrive &&
+                                <ContextMenu.Item onSelect={onSaveToDrive}>
+                                    <Flex gap='2' width='100%'>
+                                        <BiHardDrive size='18' />
+                                        Save to Drive Folder
+                                    </Flex>
+                                </ContextMenu.Item>
+                            }
                         </ContextMenu.Group>
                     }
 

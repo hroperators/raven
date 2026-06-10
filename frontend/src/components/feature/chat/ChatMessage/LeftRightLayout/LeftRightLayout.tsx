@@ -31,10 +31,11 @@ export interface Props {
     onReply: () => void,
     onForward: () => void,
     onViewReaction: () => void,
-    onAttachToDocument: () => void
+    onAttachToDocument: () => void,
+    onSaveToDrive?: () => void,
 }
 
-export const LeftRightLayout = ({ message, user, isActive, isHighlighted, onReplyMessageClick, onDelete, showThreadButton, onEdit, onReply, onForward, onViewReaction, onAttachToDocument }: Props) => {
+export const LeftRightLayout = ({ message, user, isActive, isHighlighted, onReplyMessageClick, onDelete, showThreadButton, onEdit, onReply, onForward, onViewReaction, onAttachToDocument, onSaveToDrive }: Props) => {
 
     const { name, owner: userID, is_bot_message, bot, creation: timestamp, message_reactions, is_continuation, linked_message, replied_message_details } = message
 
@@ -176,6 +177,7 @@ export const LeftRightLayout = ({ message, user, isActive, isHighlighted, onRepl
                         onForward={onForward}
                         onViewReaction={onViewReaction}
                         onAttachDocument={onAttachToDocument}
+                        onSaveToDrive={onSaveToDrive}
                     />
                 </ContextMenu.Root>
             </Flex>

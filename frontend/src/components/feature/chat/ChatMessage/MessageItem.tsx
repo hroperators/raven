@@ -44,13 +44,14 @@ interface MessageBlockProps {
     forwardMessage: (message: Message) => void,
     onReplyMessageClick: (messageID: string) => void,
     onAttachDocument: (message: Message) => void,
+    onSaveToDrive?: (message: Message) => void,
     isHighlighted?: boolean,
     setReactionMessage: (message: Message) => void,
     showThreadButton?: boolean,
     isChannelReadOnly?: boolean,
 }
 
-export const MessageItem = ({ message, setDeleteMessage, isHighlighted, onReplyMessageClick, setEditMessage, replyToMessage, forwardMessage, onAttachDocument, setReactionMessage, showThreadButton = true, isChannelReadOnly = false }: MessageBlockProps) => {
+export const MessageItem = ({ message, setDeleteMessage, isHighlighted, onReplyMessageClick, setEditMessage, replyToMessage, forwardMessage, onAttachDocument, onSaveToDrive, setReactionMessage, showThreadButton = true, isChannelReadOnly = false }: MessageBlockProps) => {
 
     const { name, owner: userID, is_bot_message, bot, creation: timestamp, message_reactions, is_continuation, linked_message, replied_message_details } = message
 
@@ -74,6 +75,10 @@ export const MessageItem = ({ message, setDeleteMessage, isHighlighted, onReplyM
 
     const onAttachToDocument = () => {
         onAttachDocument(message)
+    }
+
+    const onSaveToDriveFolder = () => {
+        onSaveToDrive?.(message)
     }
 
     const onViewReaction = () => {
@@ -150,6 +155,7 @@ export const MessageItem = ({ message, setDeleteMessage, isHighlighted, onReplyM
                 onForward={onForward}
                 onViewReaction={onViewReaction}
                 onAttachToDocument={onAttachToDocument}
+                onSaveToDrive={['File', 'Image'].includes(message.message_type) ? onSaveToDriveFolder : undefined}
             /> :
                 <Box className='relative'>
                     {!message.is_continuation && message.is_thread ?
@@ -259,6 +265,7 @@ export const MessageItem = ({ message, setDeleteMessage, isHighlighted, onReplyM
                             onViewReaction={onViewReaction}
                             selectedText={selectedText}
                             onAttachDocument={onAttachToDocument}
+                            onSaveToDrive={['File', 'Image'].includes(message.message_type) ? onSaveToDriveFolder : undefined}
                         />
                     </ContextMenu.Root>
                 </Box>}

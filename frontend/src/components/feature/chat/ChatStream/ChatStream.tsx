@@ -15,6 +15,7 @@ import { FiArrowDown } from 'react-icons/fi'
 import { ErrorBanner } from '@/components/layout/AlertBanner/ErrorBanner'
 import { ForwardMessageDialog, useForwardMessage } from '../ChatMessage/MessageActions/ForwardMessage'
 import AttachFileToDocumentDialog, { useAttachFileToDocument } from '../ChatMessage/MessageActions/AttachFileToDocument'
+import SaveToDriveFolderDialog, { useSaveToDriveFolder } from '../ChatMessage/MessageActions/SaveToDriveFolder'
 import { ReactionAnalyticsDialog, useMessageReactionAnalytics } from '../ChatMessage/MessageActions/MessageReactionAnalytics'
 import SystemMessageBlock from '../ChatMessage/SystemMessageBlock'
 import { useUserData } from '@/hooks/useUserData'
@@ -82,6 +83,7 @@ const ChatStream = forwardRef(({ channelID, replyToMessage, showThreadButton = t
     const { setEditMessage, ...editProps } = useEditMessage(onModalClose)
     const { setForwardMessage, ...forwardProps } = useForwardMessage(onModalClose)
     const { setAttachDocument, ...attachDocProps } = useAttachFileToDocument(onModalClose)
+    const { setSaveToDrive, ...saveToDriveProps } = useSaveToDriveFolder(onModalClose)
 
     const { setReactionMessage, ...reactionProps } = useMessageReactionAnalytics(onModalClose)
 
@@ -183,6 +185,7 @@ const ChatStream = forwardRef(({ channelID, replyToMessage, showThreadButton = t
                                     forwardMessage={setForwardMessage}
                                     showThreadButton={showThreadButton}
                                     onAttachDocument={setAttachDocument}
+                                    onSaveToDrive={setSaveToDrive}
                                     setDeleteMessage={setDeleteMessage}
                                     setReactionMessage={setReactionMessage}
                                     isChannelReadOnly={isChannelReadOnly}
@@ -211,6 +214,7 @@ const ChatStream = forwardRef(({ channelID, replyToMessage, showThreadButton = t
             <EditMessageDialog {...editProps} />
             <ForwardMessageDialog {...forwardProps} />
             <AttachFileToDocumentDialog {...attachDocProps} />
+            <SaveToDriveFolderDialog {...saveToDriveProps} />
             <ReactionAnalyticsDialog {...reactionProps} />
         </div>
 
